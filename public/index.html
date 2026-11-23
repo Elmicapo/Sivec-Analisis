@@ -3,31 +3,36 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SIVEC | Oferta deportiva y cultural</title>
+  <title>SIVEC | Portal municipal de oferta deportiva y cultural</title>
   <link rel="stylesheet" href="/sivec.css">
   <script src="/sivec.js" defer></script>
 </head>
-<body>
+<body class="page-grid">
   <header>
-    <div class="wrap masthead">
-      <a class="brand" href="/">SIVEC</a>
+    <div class="dossier-bar">
+      <span class="dossier-pill">SIVEC · Portal municipal</span>
       <nav aria-label="Secciones">
+        <a href="#cronogramas">Cronogramas</a>
         <a href="#escenarios">Escenarios</a>
         <a href="#inscripciones">Inscripciones</a>
-        <a href="/demo.html">Prototipo original</a>
       </nav>
     </div>
+    <h1 class="title">Sistema Público de Información Deportiva y Cultural</h1>
   </header>
-  <main class="wrap">
-    <h1>Oferta deportiva y cultural</h1>
+  <main>
+    <section id="cronogramas" aria-labelledby="cronogramas-titulo">
+      <h2 class="section-title" id="cronogramas-titulo">Inventario público de cronogramas</h2>
+      <p id="schedule-status" role="status">Cargando cronogramas…</p>
+      <ul id="schedule-list" class="cards"></ul>
+    </section>
     <section id="escenarios" aria-labelledby="escenarios-titulo">
-      <h2 id="escenarios-titulo">Escenarios y semáforo</h2>
+      <h2 class="section-title" id="escenarios-titulo">Semáforo de escenarios deportivos</h2>
       <p id="facility-status" role="status">Cargando escenarios…</p>
       <ul id="facility-list" class="cards"></ul>
     </section>
     <section id="inscripciones" aria-labelledby="inscripciones-titulo">
-      <h2 id="inscripciones-titulo">Inscripciones</h2>
-      <div class="panel">
+      <h2 class="section-title" id="inscripciones-titulo">Inscripciones</h2>
+      <div class="figure-card panel">
         <form id="login">
           <h3>Iniciar sesión</h3>
           <label>Usuario<input name="credencialesLogin" autocomplete="username" maxlength="50" required></label>
@@ -41,7 +46,7 @@
         <p id="login-status" role="status"></p>
         <form id="enrollment" hidden>
           <label for="schedule">Cronograma</label>
-          <select id="schedule" name="scheduleId" required></select>
+          <select id="schedule" name="scheduleId" required disabled></select>
           <button id="enroll-button" disabled>Confirmar inscripción</button>
         </form>
         <p id="enrollment-status" role="status"></p>

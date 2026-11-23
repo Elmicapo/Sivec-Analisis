@@ -1,35 +1,61 @@
 :root {
-  color: #122e3c;
-  background: #f3f7f8;
+  color-scheme: light;
+  --background: #faf9f5;
+  --surface: #fff;
+  --text: #17181a;
+  --secondary: #1f4e5f;
+  --highlight: #f2b705;
+  --border: #dedad0;
   font: 1rem/1.55 system-ui, sans-serif;
+  color: var(--text);
+  background: var(--background);
 }
 * { box-sizing: border-box; }
-[hidden] { display: none !important; }
+[hidden], [role="status"]:empty { display: none !important; }
 body { margin: 0; }
-.wrap { width: min(100% - 2rem, 70rem); margin: auto; }
-header { background: #103647; color: white; }
-.masthead, nav { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
-.masthead { justify-content: space-between; padding: 1rem 0; }
-header a { color: inherit; }
-.brand { font: 700 1.6rem Georgia, serif; text-decoration: none; letter-spacing: .06em; }
-main { padding-block: 2rem 4rem; }
-h1, h2 { font-family: Georgia, serif; line-height: 1.15; }
-h1 { font-size: clamp(2.2rem, 6vw, 4rem); margin: 0 0 2.5rem; }
-h2 { font-size: 1.8rem; margin: 0 0 1rem; }
-h3 { margin: 0; }
+.page-grid {
+  width: min(100% - 2rem, 76rem);
+  margin: auto;
+  padding-block: 1.5rem 4rem;
+}
+.dossier-bar, nav { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem 1rem; }
+.dossier-bar { justify-content: space-between; border-bottom: 2px solid var(--text); padding-bottom: .75rem; }
+.dossier-pill {
+  background: var(--highlight);
+  padding: .2rem .6rem;
+  font-size: .875rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+nav a { color: var(--secondary); font-weight: 600; text-underline-offset: .22em; }
+.title, .section-title { font-family: Georgia, serif; line-height: 1.15; }
+.title { max-width: 27ch; font-size: clamp(2rem, 5vw, 3.6rem); margin: 1.25rem 0 2.5rem; }
+.section-title { border-top: 2px solid var(--text); padding-top: .75rem; font-size: 1.7rem; margin: 0 0 1rem; }
+h3 { margin: 0; font-size: 1.1rem; }
 section + section { margin-top: 2.5rem; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 1rem; padding: 0; list-style: none; }
-.cards > li, .panel { padding: 1.15rem; background: white; border: 1px solid #cddde3; border-radius: .75rem; }
-.badge { display: inline-block; padding: .2rem .55rem; border-radius: .35rem; font-weight: 700; background: #e7edf0; }
-.verde { color: #17563c; background: #d9f3e3; }
-.amarillo { color: #624810; background: #f8edc9; }
-.rojo { color: #78202d; background: #fae0e5; }
-.panel { max-width: 39rem; }
-form { display: grid; gap: .75rem; }
-label { display: grid; gap: .25rem; font-weight: 600; }
-input, select, button { font: inherit; padding: .6rem .8rem; border-radius: .35rem; }
-input, select { border: 1px solid #788e98; width: 100%; }
-button { border: 1px solid #0b6271; background: #0b6271; color: white; justify-self: start; cursor: pointer; }
-button.secondary { color: #0b5363; background: white; }
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cards > li, .figure-card { padding: 1.15rem; background: var(--surface); border: 1px solid var(--border); border-radius: .25rem; }
+.cards p { margin: .5rem 0; }
+.badge { display: inline-block; padding: .2rem .55rem; border-radius: .2rem; font-weight: 700; }
+.verde { color: #235a44; background: #e6f4ed; }
+.amarillo { color: #734900; background: #fcf1d6; }
+.rojo { color: #931e15; background: #fce8e6; }
+.panel { max-width: 40rem; }
+#session { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+#enrollment { margin-top: 1rem; }
+form, label { display: grid; gap: .75rem; }
+label { gap: .25rem; font-weight: 600; }
+input, select, button { font: inherit; padding: .6rem .8rem; border-radius: .25rem; }
+input, select { border: 1px solid #827d71; width: 100%; }
+button { border: 1px solid var(--secondary); background: var(--secondary); color: white; justify-self: start; cursor: pointer; }
+button.secondary { color: var(--secondary); background: white; }
 button:disabled { opacity: .55; cursor: default; }
-[role="status"]:empty { display: none; }
+:focus-visible { outline: 3px solid var(--secondary); outline-offset: 3px; }

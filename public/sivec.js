@@ -44,21 +44,25 @@ async function loadFacilities() {
 }
 
 async function loadSchedules() {
-  enrollmentStatus.textContent = 'Cargando cronogramas…';
-  enrollButton.disabled = true;
+  const status = document.querySelector('#schedule-status');
+  const list = document.querySelector('#schedule-list');
   schedule.replaceChildren(new Option('Selecciona un cronograma', ''));
   try {
     const schedules = await api('/schedules');
     for (const row of schedules) {
-      schedule.add(new Option(
-        row.discipline + ' · ' + row.facility + ' · ' + row.days + ' ' + row.startTime.slice(0, 5),
-        row.id,
-      ));
+      const card = document.createElement('li');
+      const hours = row.days + ' · ' + row.startTime.slice(0, 5) + '–' + row.endTime.slice(0, 5);
+      appendText(card, 'h3', row.discipline);
+      appendText(card, 'p', row.facility);
+      appendText(card, 'p', hours);
+      list.append(card);
+      schedule.add(new Option(row.discipline + ' · ' + row.facility + ' · ' + hours, row.id));
     }
+    schedule.disabled = !schedules.length;
     enrollButton.disabled = !schedules.length;
-    enrollmentStatus.textContent = schedules.length ? '' : 'No hay cronogramas disponibles.';
+    status.textContent = schedules.length ? '' : 'No hay cronogramas disponibles.';
   } catch {
-    enrollmentStatus.textContent = 'No se pudieron cargar los cronogramas.';
+    status.textContent = 'No se pudieron consultar los cronogramas. Verifica la conexión con MySQL.';
   }
 }
 
@@ -85,7 +89,6 @@ login.addEventListener('submit', async (event) => {
     login.reset();
     showSession();
     loginStatus.textContent = enrollment.hidden ? 'Las inscripciones requieren el rol Deportista.' : '';
-    if (!enrollment.hidden) await loadSchedules();
   } catch (error) {
     loginStatus.textContent = error.message;
   } finally {
@@ -129,8 +132,9 @@ enrollment.addEventListener('submit', async (event) => {
       enrollmentStatus.textContent = error.message;
     }
   } finally {
-    if (session === activeSession) enrollButton.disabled = false;
+    enrollButton.disabled = schedule.disabled;
   }
 });
 
 loadFacilities();
+loadSchedules();

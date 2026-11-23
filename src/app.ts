@@ -30,21 +30,7 @@ const authController = new AuthController(pool, ENV.JWT_SECRET);
 const schedules = new MySqlScheduleCatalog(pool);
 app.use('/api/v1', createApiRouter(enrollmentController, facilityController, authController, schedules));
 
-const publicDirectory = path.join(__dirname, '..', 'public');
-app.use(express.static(publicDirectory, {
-  setHeaders(response, file) {
-    if (path.basename(file) !== 'demo.html') return;
-    // El prototipo original usa scripts y estilos en línea. Aísla su origen del portal.
-    response.setHeader('Content-Security-Policy', [
-      'sandbox allow-scripts',
-      "default-src 'none'",
-      "script-src 'unsafe-inline' https://unpkg.com",
-      "style-src 'unsafe-inline' https://fonts.googleapis.com",
-      'font-src https://fonts.gstatic.com',
-      "img-src data:",
-    ].join('; '));
-  },
-}));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(errorHandler);
 
 export default app;
