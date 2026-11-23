@@ -17,3 +17,9 @@ try { node .\dist\scripts\set-password.js deportista_andres } finally { Remove-I
 ```
 
 Inicia sesión con `POST /api/v1/auth/login` y un objeto JSON con `credencialesLogin` y `credencialesClave`. Luego llama a `POST /api/v1/enrollments` con la cabecera `Authorization: Bearer TOKEN` y un objeto JSON con `scheduleId`. MySQL guarda la inscripción del deportista autenticado y comprueba el cruce de horarios.
+
+## Interfaz web
+
+Abre http://localhost:3000 después de iniciar el servidor. La pantalla consulta escenarios y cronogramas en MySQL. Puedes iniciar sesión con el deportista configurado arriba, seleccionar un cronograma y confirmar la inscripción. El mismo servidor Express sirve la página y la API.
+
+En «Prototipo original» está la interfaz de demostración entregada como HTML. Usa sus propios datos de ejemplo para los módulos de veeduría, gestión y reportes.

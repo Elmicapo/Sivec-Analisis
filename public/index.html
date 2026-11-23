@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SIVEC | Oferta deportiva y cultural</title>
+  <link rel="stylesheet" href="/sivec.css">
+  <script src="/sivec.js" defer></script>
+</head>
+<body>
+  <header>
+    <div class="wrap masthead">
+      <a class="brand" href="/">SIVEC</a>
+      <nav aria-label="Secciones">
+        <a href="#escenarios">Escenarios</a>
+        <a href="#inscripciones">Inscripciones</a>
+        <a href="/demo.html">Prototipo original</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <h1>Oferta deportiva y cultural</h1>
+    <section id="escenarios" aria-labelledby="escenarios-titulo">
+      <h2 id="escenarios-titulo">Escenarios y semáforo</h2>
+      <p id="facility-status" role="status">Cargando escenarios…</p>
+      <ul id="facility-list" class="cards"></ul>
+    </section>
+    <section id="inscripciones" aria-labelledby="inscripciones-titulo">
+      <h2 id="inscripciones-titulo">Inscripciones</h2>
+      <div class="panel">
+        <form id="login">
+          <h3>Iniciar sesión</h3>
+          <label>Usuario<input name="credencialesLogin" autocomplete="username" maxlength="50" required></label>
+          <label>Contraseña<input name="credencialesClave" type="password" autocomplete="current-password" maxlength="256" required></label>
+          <button>Ingresar</button>
+        </form>
+        <div id="session" hidden>
+          <p id="profile"></p>
+          <button type="button" class="secondary" id="logout">Cerrar sesión</button>
+        </div>
+        <p id="login-status" role="status"></p>
+        <form id="enrollment" hidden>
+          <label for="schedule">Cronograma</label>
+          <select id="schedule" name="scheduleId" required></select>
+          <button id="enroll-button" disabled>Confirmar inscripción</button>
+        </form>
+        <p id="enrollment-status" role="status"></p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
