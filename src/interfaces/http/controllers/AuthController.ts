@@ -31,36 +31,41 @@ export class AuthController {
         res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
         return;
       }
-      const token = jwt.sign({ role: user.tipo_rol }, this.secret, {
-        algorithm: 'HS256', subject: user.id_usuario, expiresIn: '1h',
-      });
-      res.json({ data: { token, usuario: {
-        idUsuario: user.id_usuario,
-        nombreCompleto: user.nombre_completo,
-        tipoRol: user.tipo_rol,
-      } } });
-    } catch (error) {
-      next(error);
-    }
-  };
+        const token = jwt.sign({ role: user.tipo_rol }, this.secret, {
+          algorithm: 'HS256', subject: user.id_usuario, expiresIn: '1h',
+        });
+        res.json({ data: { token, usuario: {
+          idUsuario: user.id_usuario,
+          nombreCompleto: user.nombre_completo,
+          tipoRol: user.tipo_rol,
+        } } });
+      } catch (error) {
+        next(error);
+      }
+    };
 
-  requireAthlete = (req: Request, res: Response, next: NextFunction): void => {
-    const token = /^Bearer (\S+)$/i.exec(req.get('authorization') ?? '')?.[1];
-    try {
-      const claims = jwt.verify(token ?? '', this.secret, { algorithms: ['HS256'] });
-      if (typeof claims === 'string' || !claims.sub) {
-        res.status(401).json({ error: 'Token inválido.' });
+    requireAthlete = this.requireRole('DEPORTISTA', 'athleteId');
+    requireCmj = this.requireRole('CMJ', 'cmjId');
+
+    private requireRole(role: string, identityKey: string) {
+      return (req: Request, res: Response, next: NextFunction): void => {
+      const token = /^Bearer (\S+)$/i.exec(req.get('authorization') ?? '')?.[1];
+      try {
+        const claims = jwt.verify(token ?? '', this.secret, { algorithms: ['HS256'] });
+        if (typeof claims === 'string' || !claims.sub) {
+          res.status(401).json({ error: 'Token inválido.' });
+          return;
+        }
+        if (claims.role !== role) {
+          res.status(403).json({ error: `Esta operación requiere el rol ${role}.` });
+          return;
+        }
+        res.locals[identityKey] = claims.sub;
+      } catch {
+        res.status(401).json({ error: 'Token ausente, inválido o vencido.' });
         return;
       }
-      if (claims.role !== 'DEPORTISTA') {
-        res.status(403).json({ error: 'Esta operación requiere el rol DEPORTISTA.' });
-        return;
-      }
-      res.locals.athleteId = claims.sub;
-    } catch {
-      res.status(401).json({ error: 'Token ausente, inválido o vencido.' });
-      return;
-    }
-    next();
-  };
+      next();
+    };
+  }
 }

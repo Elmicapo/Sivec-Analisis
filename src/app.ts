@@ -15,13 +15,11 @@ import { FacilityController } from './interfaces/http/controllers/FacilityContro
 import { errorHandler } from './interfaces/http/middlewares/ErrorHandler';
 import { createApiRouter } from './interfaces/http/routes/api.routes';
 
+import { createOversightRouter } from './interfaces/http/routes/oversight.routes';
+
 const app = express();
 
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: { imgSrc: ["'self'", 'data:', 'https://images.unsplash.com'] },
-  },
-}));
+app.use(helmet());
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
@@ -32,6 +30,7 @@ const facilityController = new FacilityController(new MySqlFacilityRepository(po
 if (ENV.JWT_SECRET.length < 32) throw new Error('Configura JWT_SECRET con al menos 32 caracteres en .env.');
 const authController = new AuthController(pool, ENV.JWT_SECRET);
 const schedules = new MySqlScheduleCatalog(pool);
+app.use('/api/v1/veedurias', createOversightRouter(pool, authController));
 app.use('/api/v1', createApiRouter(enrollmentController, facilityController, authController, schedules));
 
 app.use(express.static(path.join(__dirname, '..', 'public')));
