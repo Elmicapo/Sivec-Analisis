@@ -15,6 +15,7 @@ import { FacilityController } from './interfaces/http/controllers/FacilityContro
 import { errorHandler } from './interfaces/http/middlewares/ErrorHandler';
 import { createApiRouter } from './interfaces/http/routes/api.routes';
 
+import { createCatalogRouter } from './interfaces/http/routes/catalog.routes';
 import { createOversightRouter } from './interfaces/http/routes/oversight.routes';
 
 const app = express();
@@ -30,6 +31,7 @@ const facilityController = new FacilityController(new MySqlFacilityRepository(po
 if (ENV.JWT_SECRET.length < 32) throw new Error('Configura JWT_SECRET con al menos 32 caracteres en .env.');
 const authController = new AuthController(pool, ENV.JWT_SECRET);
 const schedules = new MySqlScheduleCatalog(pool);
+app.use('/api/v1', createCatalogRouter(pool, authController));
 app.use('/api/v1/veedurias', createOversightRouter(pool, authController));
 app.use('/api/v1', createApiRouter(enrollmentController, facilityController, authController, schedules));
 

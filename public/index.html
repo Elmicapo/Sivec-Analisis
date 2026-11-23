@@ -12,6 +12,7 @@
     <div class="dossier-bar">
       <span class="dossier-pill">SIVEC · Portal municipal</span>
       <nav aria-label="Secciones">
+        <a href="#catalogo">Catálogo</a>
         <a href="#cronogramas">Cronogramas</a>
         <a href="#escenarios">Escenarios</a>
         <a href="#inscripciones">Inscripciones</a>
@@ -21,8 +22,24 @@
     <h1 class="title">Sistema Público de Información Deportiva y Cultural</h1>
   </header>
   <main>
+    <section id="catalogo" aria-labelledby="catalogo-titulo">
+      <h2 class="section-title" id="catalogo-titulo">Catálogo de disciplinas y entrenadores</h2>
+      <label>Buscar disciplinas por nombre, categoría o ubicación
+        <input id="discipline-search" type="search">
+      </label>
+      <p id="discipline-status" role="status">Cargando disciplinas…</p>
+      <ul id="discipline-list" class="cards"></ul>
+      <label>Buscar entrenadores por nombre o deporte
+        <input id="coach-search" type="search">
+      </label>
+      <p id="coach-status" role="status">Cargando entrenadores…</p>
+      <ul id="coach-list" class="cards"></ul>
+    </section>
     <section id="cronogramas" aria-labelledby="cronogramas-titulo">
       <h2 class="section-title" id="cronogramas-titulo">Inventario público de cronogramas</h2>
+      <label>Filtrar cronogramas por disciplina, escenario o entrenador
+        <input id="schedule-search" type="search">
+      </label>
       <p id="schedule-status" role="status">Cargando cronogramas…</p>
       <ul id="schedule-list" class="cards"></ul>
     </section>
@@ -51,11 +68,16 @@
           <button id="enroll-button" disabled>Confirmar inscripción</button>
         </form>
         <p id="enrollment-status" role="status"></p>
+        <div id="athlete-history" hidden>
+          <h3>Mis inscripciones</h3>
+          <p id="athlete-history-status" role="status"></p>
+          <ul id="athlete-history-list" class="cards"></ul>
+        </div>
       </div>
     </section>
     <section id="veeduria" aria-labelledby="veeduria-titulo">
       <h2 class="section-title" id="veeduria-titulo">Veeduría ciudadana y revisión del CMJ</h2>
-      <p id="oversight-access"><a href="#inscripciones">Inicia sesión</a> para enviar un reporte como deportista o revisarlo como integrante del CMJ.</p>
+      <p id="oversight-access">Puedes reportar el deterioro de un escenario sin crear una cuenta.</p>
       <form id="oversight-form" class="figure-card panel" hidden>
         <h3>Reportar el deterioro de un escenario</h3>
         <label for="report-facility">Escenario</label>
@@ -63,13 +85,29 @@
         <label>Descripción
           <textarea name="descripcionDeterioro" rows="4" maxlength="2000" required></textarea>
         </label>
+        <fieldset id="community-fields">
+          <legend>Datos del reportante</legend>
+          <label>Nombre completo<input name="nombreCompleto" maxlength="150" required></label>
+          <label>Número de identificación<input name="numeroIdentificacion" maxlength="20" required></label>
+          <label>Género<input name="genero" maxlength="20" required></label>
+          <label>Edad<input name="edad" type="number" min="0" max="120" required></label>
+          <label>Dirección de residencia<input name="direccionResidencia" maxlength="200" required></label>
+          <label>Correo electrónico<input name="correoElectronico" type="email" maxlength="100" required></label>
+        </fieldset>
         <button disabled>Enviar reporte</button>
       </form>
       <div id="oversight-review" hidden>
         <h3>Reportes pendientes</h3>
         <ul id="oversight-list" class="cards"></ul>
+        <h3>Reportes validados por oficializar</h3>
+        <ul id="officialization-list" class="cards"></ul>
       </div>
       <p id="oversight-status" role="status"></p>
+      <h3>Histórico por escenario</h3>
+      <label for="history-facility">Selecciona un escenario</label>
+      <select id="history-facility" disabled></select>
+      <p id="history-status" role="status"></p>
+      <ul id="history-list" class="cards"></ul>
     </section>
   </main>
 </body>

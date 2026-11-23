@@ -47,7 +47,15 @@ export class AuthController {
     requireAthlete = this.requireRole('DEPORTISTA', 'athleteId');
     requireCmj = this.requireRole('CMJ', 'cmjId');
 
-    private requireRole(role: string, identityKey: string) {
+    reportIdentity = (req: Request, res: Response, next: NextFunction): void => {
+    if (req.get('authorization') === undefined) {
+      next();
+      return;
+    }
+    this.requireAthlete(req, res, next);
+  };
+
+  private requireRole(role: string, identityKey: string) {
       return (req: Request, res: Response, next: NextFunction): void => {
       const token = /^Bearer (\S+)$/i.exec(req.get('authorization') ?? '')?.[1];
       try {

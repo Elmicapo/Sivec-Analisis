@@ -71,3 +71,19 @@ textarea {
 #oversight-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); }
 #oversight-review h3 { margin-bottom: .6rem; }
 #oversight-list p, #oversight-status { overflow-wrap: anywhere; }
+
+#community-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: .75rem;
+  border: 1px solid var(--border);
+  border-radius: .25rem;
+  padding: 1rem;
+  min-width: 0;
+}
+#history-facility { max-width: 40rem; margin: .5rem 0 1rem; }
+#oversight-review h3:not(:first-child) { margin-top: 1.5rem; }
+#history-list h4 { margin: 0; }
+#catalogo > label, #cronogramas > label { max-width: 40rem; margin: 1rem 0; }
+#athlete-history { margin-top: 1.25rem; }
+#athlete-history h4 { margin: 0; }

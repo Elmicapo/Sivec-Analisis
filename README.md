@@ -22,6 +22,12 @@ Inicia sesión con `POST /api/v1/auth/login` y un objeto JSON con `credencialesL
 
 Abre http://localhost:3000 después de iniciar el servidor. La pantalla consulta escenarios y cronogramas en MySQL. Puedes iniciar sesión con el deportista configurado arriba, seleccionar un cronograma y confirmar la inscripción. El mismo servidor Express sirve la página y la API.
 
-## Veeduría
+## Veeduría y demostración
 
-El deportista autenticado puede enviar reportes desde la página. Para revisar con el rol CMJ, configura una contraseña para `cmj_laura` con los mismos pasos del usuario de prueba y cambia el nombre de usuario en el comando `set-password.js`. Al guardar una aprobación con un color, el disparador de MySQL aplica RN-03 y actualiza el semáforo en la misma transacción.
+La comunidad puede reportar sin cuenta completando sus datos y el deportista puede reportar desde su sesión. Para revisar con el rol CMJ, configura la contraseña de `cmj_laura` con el mismo procedimiento de `set-password.js`.
+
+1. En la página, crea un reporte desde Veeduría.
+2. Entra como CMJ, abre Veeduría y valida el reporte pendiente. El semáforo mantiene su color hasta la oficialización.
+3. En «Reportes validados por oficializar», selecciona un color y guarda el cambio. El semáforo y el histórico por escenario se actualizan.
+
+El diseño, los permisos por rol y la cobertura de los requisitos están en [Diseño de SIVEC](docs/diseno-sivec.md).

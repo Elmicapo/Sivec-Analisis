@@ -9,7 +9,15 @@ const reportFacility = document.querySelector('#report-facility');
 const reportStatus = document.querySelector('#oversight-status');
 const reviewPanel = document.querySelector('#oversight-review');
 const reviewList = document.querySelector('#oversight-list');
+const communityFields = document.querySelector('#community-fields');
+const officializationList = document.querySelector('#officialization-list');
+const historyFacility = document.querySelector('#history-facility');
+const historyList = document.querySelector('#history-list');
+const historyStatus = document.querySelector('#history-status');
+const dateFormat = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Bogota' });
 let session = null;
+let historyRequest = 0;
+const athleteHistory = document.querySelector('#athlete-history');
 
 async function api(path, options = {}) {
   const response = await fetch('/api/v1' + path, options);
@@ -35,11 +43,13 @@ async function loadFacilities() {
     const facilities = await api('/facilities');
     const list = document.querySelector('#facility-list');
     list.replaceChildren();
-    const selected = reportFacility.value;
-    reportFacility.replaceChildren(new Option('Selecciona un escenario', ''));
-    for (const facility of facilities) reportFacility.add(new Option(facility.name, facility.id));
-    reportFacility.value = facilities.some((facility) => facility.id === selected) ? selected : '';
-    reportFacility.disabled = facilities.length === 0;
+    for (const select of [reportFacility, historyFacility]) {
+      const selected = select.value;
+      select.replaceChildren(new Option('Selecciona un escenario', ''));
+      for (const facility of facilities) select.add(new Option(facility.name, facility.id));
+      select.value = facilities.some((facility) => facility.id === selected) ? selected : '';
+      select.disabled = facilities.length === 0;
+    }
     reportForm.querySelector('button').disabled = reportFacility.disabled;
     for (const facility of facilities) {
       const card = document.createElement('li');
@@ -67,12 +77,15 @@ async function loadSchedules() {
       appendText(card, 'h3', row.discipline);
       appendText(card, 'p', row.facility);
       appendText(card, 'p', hours, 'schedule-time');
+      appendText(card, 'p', 'Entrenador: ' + row.coach);
+      appendText(card, 'p', 'Vigencia: ' + row.validFrom + ' a ' + row.validUntil);
       list.append(card);
       schedule.add(new Option(row.discipline + ' · ' + row.facility + ' · ' + hours, row.id));
     }
     schedule.disabled = !schedules.length;
     enrollButton.disabled = !schedules.length;
     status.textContent = schedules.length ? '' : 'No hay cronogramas disponibles.';
+    filterCards('schedule');
   } catch {
     status.textContent = 'No se pudieron consultar los cronogramas. Verifica la conexión con MySQL.';
   }
@@ -86,11 +99,17 @@ function showSession() {
     : '';
   const role = session?.usuario.tipoRol;
   enrollment.hidden = role !== 'DEPORTISTA';
-  reportForm.hidden = role !== 'DEPORTISTA';
+  reportForm.hidden = role === 'CMJ';
+  communityFields.hidden = role === 'DEPORTISTA';
+  communityFields.disabled = communityFields.hidden;
   reviewPanel.hidden = role !== 'CMJ';
-  document.querySelector('#oversight-access').hidden = !reportForm.hidden || !reviewPanel.hidden;
+  document.querySelector('#oversight-access').hidden = role === 'DEPORTISTA' || role === 'CMJ';
   reportStatus.textContent = '';
+  athleteHistory.hidden = role !== 'DEPORTISTA';
+  document.querySelector('#athlete-history-list').replaceChildren();
+  if (role === 'DEPORTISTA') loadAthleteHistory();
   reviewList.replaceChildren();
+  officializationList.replaceChildren();
   if (role === 'CMJ') loadPendingReports();
 }
 
@@ -142,6 +161,8 @@ enrollment.addEventListener('submit', async (event) => {
     });
     if (session === activeSession) {
       enrollmentStatus.textContent = 'Inscripción confirmada. Referencia: ' + result.id;
+      loadAthleteHistory();
+      loadCatalog('discipline', '/disciplinas', disciplineDetails);
     }
   } catch (error) {
     if (session !== activeSession) return;
@@ -168,15 +189,18 @@ function sessionHeaders(activeSession) {
 reportForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   const activeSession = session;
-  if (!activeSession) return;
+  const athlete = activeSession?.usuario.tipoRol === 'DEPORTISTA';
+  const { idEscenario, descripcionDeterioro, ...community } = Object.fromEntries(new FormData(reportForm));
+  const payload = { idEscenario, descripcionDeterioro };
+  if (!athlete) payload.usuarioComunidad = { ...community, edad: Number(community.edad) };
   const button = event.submitter;
   button.disabled = true;
   reportStatus.textContent = 'Enviando reporte…';
   try {
     const result = await api('/veedurias', {
       method: 'POST',
-      headers: sessionHeaders(activeSession),
-      body: JSON.stringify(Object.fromEntries(new FormData(reportForm))),
+      headers: athlete ? sessionHeaders(activeSession) : { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     });
     if (session !== activeSession) return;
     reportForm.reset();
@@ -193,22 +217,29 @@ async function loadPendingReports(message) {
   reviewList.replaceChildren();
   reportStatus.textContent = message ?? 'Cargando reportes pendientes…';
   try {
-    const rows = await api('/veedurias/pendientes', { headers: sessionHeaders(activeSession) });
+    const headers = sessionHeaders(activeSession);
+    const [rows, approved] = await Promise.all([
+      api('/veedurias/pendientes', { headers }),
+      api('/veedurias/por-oficializar', { headers }),
+    ]);
     if (session !== activeSession) return;
-    for (const row of rows) reviewList.append(createReviewCard(row, activeSession));
-    reportStatus.textContent = message ?? (rows.length ? '' : 'No hay reportes pendientes.');
+    reviewList.replaceChildren(...rows.map((row) => createReviewCard(row, activeSession, false)));
+    officializationList.replaceChildren(...approved.map((row) => createReviewCard(row, activeSession, true)));
+    if (!rows.length) appendText(reviewList, 'li', 'No hay reportes pendientes.');
+    if (!approved.length) appendText(officializationList, 'li', 'No hay reportes por oficializar.');
+    reportStatus.textContent = message ?? '';
   } catch (error) {
     if (session === activeSession) reportStatus.textContent = error.message;
   }
 }
 
-function createReviewCard(row, activeSession) {
+function createReviewCard(row, activeSession, officializing) {
   const card = document.createElement('li');
   appendText(card, 'h3', row.escenario);
   appendText(card, 'p', row.descripcion);
   const form = document.createElement('form');
   const decision = document.createElement('select');
-  decision.add(new Option('Validar y actualizar semáforo', 'VALIDADO'));
+  decision.add(new Option('Validar reporte', 'VALIDADO'));
   decision.add(new Option('Rechazar reporte', 'RECHAZADO'));
   const color = document.createElement('select');
   for (const value of ['VERDE', 'AMARILLO', 'ROJO']) color.add(new Option(value, value));
@@ -216,19 +247,19 @@ function createReviewCard(row, activeSession) {
   observations.required = true;
   observations.maxLength = 2000;
   observations.rows = 3;
-  const colorLabel = appendField(form, 'Color del semáforo', color);
-  form.prepend(createLabel('Decisión', decision));
-  decision.addEventListener('change', () => { colorLabel.hidden = decision.value === 'RECHAZADO'; });
+  if (officializing) appendField(form, 'Color del semáforo', color);
+  else appendField(form, 'Decisión', decision);
   appendField(form, 'Observaciones del CMJ', observations);
   const button = document.createElement('button');
-  button.textContent = 'Guardar revisión';
+  button.textContent = officializing ? 'Oficializar cambio' : 'Guardar revisión';
   form.append(button);
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     button.disabled = true;
     try {
-      await api('/veedurias/' + encodeURIComponent(row.idReporte) + '/validacion', {
-        method: 'PUT',
+      const action = officializing ? '/semaforo' : '/validacion';
+      await api('/veedurias/' + encodeURIComponent(row.idReporte) + action, {
+        method: officializing ? 'PATCH' : 'PUT',
         headers: sessionHeaders(activeSession),
         body: JSON.stringify({
           estado: decision.value,
@@ -237,8 +268,9 @@ function createReviewCard(row, activeSession) {
         }),
       });
       if (session === activeSession) {
-        loadPendingReports('Revisión guardada.');
-        loadFacilities();
+        loadPendingReports(officializing ? 'Cambio de semáforo oficializado.' : 'Revisión guardada.');
+        if (officializing) loadFacilities();
+        loadHistory();
       }
     } catch (error) {
       if (session === activeSession) reportStatus.textContent = error.message;
@@ -262,5 +294,95 @@ function appendField(form, text, input) {
   return label;
 }
 
+async function loadHistory() {
+  const request = ++historyRequest;
+  const id = historyFacility.value;
+  historyList.replaceChildren();
+  historyStatus.textContent = id ? 'Cargando histórico…' : '';
+  if (!id) return;
+  try {
+    const rows = await api('/veedurias/historico/' + encodeURIComponent(id));
+    if (historyRequest !== request) return;
+    for (const row of rows) {
+      const card = document.createElement('li');
+      appendText(card, 'h4', row.estado);
+      appendText(card, 'p', 'Reporte: ' + dateFormat.format(new Date(row.fecha)));
+      if (row.validador) {
+        appendText(card, 'p', 'Revisión: ' + row.validador + ' · ' + dateFormat.format(new Date(row.fechaRevision)));
+      }
+      if (row.color) appendText(card, 'p', row.colorAnterior + ' → ' + row.color + ' · ' + dateFormat.format(new Date(row.fechaCambio)));
+      historyList.append(card);
+    }
+    historyStatus.textContent = rows.length ? '' : 'Este escenario no tiene reportes.';
+  } catch (error) {
+    if (historyRequest === request) historyStatus.textContent = error.message;
+  }
+}
+
+async function loadAthleteHistory() {
+  const activeSession = session;
+  const status = document.querySelector('#athlete-history-status');
+  const list = document.querySelector('#athlete-history-list');
+  status.textContent = 'Cargando inscripciones…';
+  try {
+    const rows = await api('/inscripciones/mi-historial', { headers: sessionHeaders(activeSession) });
+    if (activeSession !== session) return;
+    list.replaceChildren();
+    for (const row of rows) {
+      const card = document.createElement('li');
+      appendText(card, 'h4', row.disciplina);
+      appendText(card, 'p', row.escenario + ' · ' + row.dias + ' ' + row.inicio.slice(0, 5) + '–' + row.fin.slice(0, 5));
+      appendText(card, 'p', row.estado + ' · ' + dateFormat.format(new Date(row.fecha)));
+      list.append(card);
+    }
+    status.textContent = rows.length ? '' : 'Todavía no tienes inscripciones.';
+  } catch (error) {
+    if (activeSession === session) status.textContent = error.message;
+  }
+}
+
+function filterCards(catalog) {
+  const search = document.querySelector('#' + catalog + '-search');
+  const cards = Array.from(document.querySelector('#' + catalog + '-list').children);
+  const normalized = (text) => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+  const term = normalized(search.value.trim());
+  for (const card of cards) card.hidden = !normalized(card.textContent).includes(term);
+  const status = document.querySelector('#' + catalog + '-status');
+  if (cards.length) status.textContent = cards.some((card) => !card.hidden) ? '' : 'No hay resultados para esta búsqueda.';
+}
+
+async function loadCatalog(catalog, route, details) {
+  const status = document.querySelector('#' + catalog + '-status');
+  const list = document.querySelector('#' + catalog + '-list');
+  try {
+    const rows = await api(route);
+    list.replaceChildren();
+    for (const row of rows) {
+      const card = document.createElement('li');
+      appendText(card, 'h3', row.nombre);
+      for (const line of details(row)) appendText(card, 'p', line);
+      list.append(card);
+    }
+    status.textContent = rows.length ? '' : 'No hay registros disponibles.';
+    filterCards(catalog);
+  } catch (error) {
+    status.textContent = error.message;
+  }
+}
+
+function disciplineDetails(row) {
+  return [row.categoria + ' · ' + row.poblacion,
+    'Ubicación: ' + (row.ubicaciones || 'Por definir'),
+    'Entrenadores: ' + (row.entrenadores || 'Por definir'),
+    'Cupo por cronograma: ' + row.cupo + ' · Deportistas inscritos: ' + row.inscritos];
+}
+
+for (const catalog of ['discipline', 'coach', 'schedule']) {
+  document.querySelector('#' + catalog + '-search').addEventListener('input', () => filterCards(catalog));
+}
+loadCatalog('discipline', '/disciplinas', disciplineDetails);
+loadCatalog('coach', '/entrenadores', (row) => [row.deporte, 'Sesiones de ' + row.duracion + ' min', row.multiples ? 'Entrena varias disciplinas' : 'Entrena una disciplina']);
+historyFacility.addEventListener('change', loadHistory);
+showSession();
 loadFacilities();
 loadSchedules();
