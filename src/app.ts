@@ -1,20 +1,22 @@
+import path from 'node:path';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
-import { EnrollAthleteUseCase } from './application/use-cases/EnrollAthleteUseCase';
+import { ENV } from './config/env.config';
+import { AuthController } from './interfaces/http/controllers/AuthController';
 import { pool } from './infrastructure/config/database.config';
-import {
-  InMemoryDisciplineRepository,
-  InMemoryEnrollmentRepository,
-  InMemoryScheduleRepository,
-} from './infrastructure/repositories/in-memory/InMemoryRepositories';
+import { MySqlEnrollmentRepository } from './infrastructure/repositories/mysql/MySqlEnrollmentRepository';
+import { MySqlScheduleCatalog } from './infrastructure/repositories/mysql/MySqlScheduleCatalog';
 import { MySqlFacilityRepository } from './infrastructure/repositories/mysql/MySqlFacilityRepository';
 import { EnrollmentController } from './interfaces/http/controllers/EnrollmentController';
 import { FacilityController } from './interfaces/http/controllers/FacilityController';
 import { errorHandler } from './interfaces/http/middlewares/ErrorHandler';
 import { createApiRouter } from './interfaces/http/routes/api.routes';
+
+import { createCatalogRouter } from './interfaces/http/routes/catalog.routes';
+import { createOversightRouter } from './interfaces/http/routes/oversight.routes';
 
 const app = express();
 
@@ -23,15 +25,17 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 
-const enrollAthlete = new EnrollAthleteUseCase(
-  new InMemoryEnrollmentRepository(),
-  new InMemoryScheduleRepository(),
-  new InMemoryDisciplineRepository(),
-);
-const enrollmentController = new EnrollmentController(enrollAthlete);
+const enrollmentController = new EnrollmentController(new MySqlEnrollmentRepository(pool));
 const facilityController = new FacilityController(new MySqlFacilityRepository(pool));
 
-app.use('/api/v1', createApiRouter(enrollmentController, facilityController));
+if (ENV.JWT_SECRET.length < 32) throw new Error('Configura JWT_SECRET con al menos 32 caracteres en .env.');
+const authController = new AuthController(pool, ENV.JWT_SECRET);
+const schedules = new MySqlScheduleCatalog(pool);
+app.use('/api/v1', createCatalogRouter(pool, authController));
+app.use('/api/v1/veedurias', createOversightRouter(pool, authController));
+app.use('/api/v1', createApiRouter(enrollmentController, facilityController, authController, schedules));
+
+app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(errorHandler);
 
 export default app;
