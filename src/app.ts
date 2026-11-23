@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
+import { ENV } from './config/env.config';
+import { AuthController } from './interfaces/http/controllers/AuthController';
 import { pool } from './infrastructure/config/database.config';
 import { MySqlEnrollmentRepository } from './infrastructure/repositories/mysql/MySqlEnrollmentRepository';
 import { MySqlFacilityRepository } from './infrastructure/repositories/mysql/MySqlFacilityRepository';
@@ -21,7 +23,9 @@ app.use(express.json());
 const enrollmentController = new EnrollmentController(new MySqlEnrollmentRepository(pool));
 const facilityController = new FacilityController(new MySqlFacilityRepository(pool));
 
-app.use('/api/v1', createApiRouter(enrollmentController, facilityController));
+if (ENV.JWT_SECRET.length < 32) throw new Error('Configura JWT_SECRET con al menos 32 caracteres en .env.');
+const authController = new AuthController(pool, ENV.JWT_SECRET);
+app.use('/api/v1', createApiRouter(enrollmentController, facilityController, authController));
 app.use(errorHandler);
 
 export default app;

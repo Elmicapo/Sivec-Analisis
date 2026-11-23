@@ -6,9 +6,10 @@ export class EnrollmentController {
 
   enroll = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { athleteId, scheduleId } = req.body;
-      if (typeof athleteId !== 'string' || !athleteId.trim() || typeof scheduleId !== 'string' || !scheduleId.trim()) {
-        res.status(400).json({ error: 'athleteId y scheduleId son obligatorios.' });
+      const athleteId: string = res.locals.athleteId;
+      const { scheduleId } = req.body ?? {};
+      if (typeof scheduleId !== 'string' || !scheduleId.trim()) {
+        res.status(400).json({ error: 'scheduleId es obligatorio.' });
         return;
       }
       const enrollment = await this.enrollAthleteUseCase.execute(athleteId, scheduleId);
