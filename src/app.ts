@@ -3,13 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
-import { EnrollAthleteUseCase } from './application/use-cases/EnrollAthleteUseCase';
 import { pool } from './infrastructure/config/database.config';
-import {
-  InMemoryDisciplineRepository,
-  InMemoryEnrollmentRepository,
-  InMemoryScheduleRepository,
-} from './infrastructure/repositories/in-memory/InMemoryRepositories';
+import { MySqlEnrollmentRepository } from './infrastructure/repositories/mysql/MySqlEnrollmentRepository';
 import { MySqlFacilityRepository } from './infrastructure/repositories/mysql/MySqlFacilityRepository';
 import { EnrollmentController } from './interfaces/http/controllers/EnrollmentController';
 import { FacilityController } from './interfaces/http/controllers/FacilityController';
@@ -23,12 +18,7 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 
-const enrollAthlete = new EnrollAthleteUseCase(
-  new InMemoryEnrollmentRepository(),
-  new InMemoryScheduleRepository(),
-  new InMemoryDisciplineRepository(),
-);
-const enrollmentController = new EnrollmentController(enrollAthlete);
+const enrollmentController = new EnrollmentController(new MySqlEnrollmentRepository(pool));
 const facilityController = new FacilityController(new MySqlFacilityRepository(pool));
 
 app.use('/api/v1', createApiRouter(enrollmentController, facilityController));

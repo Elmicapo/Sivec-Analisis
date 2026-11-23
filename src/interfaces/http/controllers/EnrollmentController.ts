@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
-import { EnrollAthleteUseCase } from '../../../application/use-cases/EnrollAthleteUseCase';
+import { Enrollment } from '../../../domain/models/Enrollment';
 
 export class EnrollmentController {
-  constructor(private enrollAthleteUseCase: EnrollAthleteUseCase) {}
+  constructor(private readonly enrollAthleteUseCase: { execute(athleteId: string, scheduleId: string): Promise<Enrollment> }) {}
 
   enroll = async (req: Request, res: Response): Promise<void> => {
     try {
       const { athleteId, scheduleId } = req.body;
-      if (!athleteId || !scheduleId) {
+      if (typeof athleteId !== 'string' || !athleteId.trim() || typeof scheduleId !== 'string' || !scheduleId.trim()) {
         res.status(400).json({ error: 'athleteId y scheduleId son obligatorios.' });
         return;
       }
