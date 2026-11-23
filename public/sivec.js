@@ -54,7 +54,7 @@ async function loadSchedules() {
       const hours = row.days + ' · ' + row.startTime.slice(0, 5) + '–' + row.endTime.slice(0, 5);
       appendText(card, 'h3', row.discipline);
       appendText(card, 'p', row.facility);
-      appendText(card, 'p', hours);
+      appendText(card, 'p', hours, 'schedule-time');
       list.append(card);
       schedule.add(new Option(row.discipline + ' · ' + row.facility + ' · ' + hours, row.id));
     }
@@ -119,7 +119,7 @@ enrollment.addEventListener('submit', async (event) => {
       body: JSON.stringify({ scheduleId: schedule.value }),
     });
     if (session === activeSession) {
-      enrollmentStatus.textContent = 'Inscripción confirmada en MySQL. Referencia: ' + result.id;
+      enrollmentStatus.textContent = 'Inscripción confirmada. Referencia: ' + result.id;
     }
   } catch (error) {
     if (session !== activeSession) return;

@@ -17,7 +17,11 @@ import { createApiRouter } from './interfaces/http/routes/api.routes';
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: { imgSrc: ["'self'", 'data:', 'https://images.unsplash.com'] },
+  },
+}));
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());

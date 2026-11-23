@@ -7,37 +7,35 @@
   <link rel="stylesheet" href="/sivec.css">
   <script src="/sivec.js" defer></script>
 </head>
-<body class="page-grid">
-  <header>
-    <div class="dossier-bar">
-      <span class="dossier-pill">SIVEC · Portal municipal</span>
+<body>
+  <header class="site-header">
+    <div class="container header-layout">
+      <a class="brand" href="/" aria-label="SIVEC, inicio">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>SIVEC</span>
+      </a>
       <nav aria-label="Secciones">
         <a href="#cronogramas">Cronogramas</a>
         <a href="#escenarios">Escenarios</a>
-        <a href="#inscripciones">Inscripciones</a>
+        <a class="nav-action" href="#inscripciones">Mi cuenta</a>
       </nav>
     </div>
-    <h1 class="title">Sistema Público de Información Deportiva y Cultural</h1>
   </header>
-  <main>
-    <section id="cronogramas" aria-labelledby="cronogramas-titulo">
-      <h2 class="section-title" id="cronogramas-titulo">Inventario público de cronogramas</h2>
-      <p id="schedule-status" role="status">Cargando cronogramas…</p>
-      <ul id="schedule-list" class="cards"></ul>
-    </section>
-    <section id="escenarios" aria-labelledby="escenarios-titulo">
-      <h2 class="section-title" id="escenarios-titulo">Semáforo de escenarios deportivos</h2>
-      <p id="facility-status" role="status">Cargando escenarios…</p>
-      <ul id="facility-list" class="cards"></ul>
-    </section>
-    <section id="inscripciones" aria-labelledby="inscripciones-titulo">
-      <h2 class="section-title" id="inscripciones-titulo">Inscripciones</h2>
-      <div class="figure-card panel">
+  <main class="container">
+    <div class="hero">
+      <div class="hero-copy">
+        <span class="hero-kicker">Portal municipal</span>
+        <h1>Deporte y cultura <span>cerca de ti.</span></h1>
+        <p>Explora los horarios, consulta el estado de los escenarios e inscríbete en la actividad que elijas.</p>
+        <a class="hero-link" href="#cronogramas">Ver cronogramas</a>
+      </div>
+      <section id="inscripciones" class="access-panel" aria-label="Inscripciones">
         <form id="login">
-          <h3>Iniciar sesión</h3>
+          <h2>Inicia sesión</h2>
+          <p class="form-intro">Accede con tu cuenta para inscribirte.</p>
           <label>Usuario<input name="credencialesLogin" autocomplete="username" maxlength="50" required></label>
           <label>Contraseña<input name="credencialesClave" type="password" autocomplete="current-password" maxlength="256" required></label>
-          <button>Ingresar</button>
+          <button>Ingresar a SIVEC</button>
         </form>
         <div id="session" hidden>
           <p id="profile"></p>
@@ -50,7 +48,17 @@
           <button id="enroll-button" disabled>Confirmar inscripción</button>
         </form>
         <p id="enrollment-status" role="status"></p>
-      </div>
+      </section>
+    </div>
+    <section id="cronogramas" aria-labelledby="cronogramas-titulo">
+      <h2 class="section-title" id="cronogramas-titulo">Cronogramas de actividades</h2>
+      <p id="schedule-status" role="status">Cargando cronogramas…</p>
+      <ul id="schedule-list" class="cards"></ul>
+    </section>
+    <section id="escenarios" aria-labelledby="escenarios-titulo">
+      <h2 class="section-title" id="escenarios-titulo">Escenarios deportivos</h2>
+      <p id="facility-status" role="status">Cargando escenarios…</p>
+      <ul id="facility-list" class="cards"></ul>
     </section>
   </main>
 </body>
